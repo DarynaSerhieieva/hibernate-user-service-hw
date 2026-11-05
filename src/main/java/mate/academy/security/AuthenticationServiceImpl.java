@@ -17,24 +17,16 @@ public class AuthenticationServiceImpl implements AuthenticationService {
     @Override
     public User login(String email, String password) throws AuthenticationException {
         Optional<User> userOptional = userService.findByEmail(email);
-        if (userOptional.isPresent()) {
-            User user = userOptional.get();
-            if (user.getPassword().equals(
-                    HashUtil.hashPassword(password, user.getSalt()))) {
 
-                return user;
-            }
+        if (userOptional.isEmpty()
+                || !userOptional.get().getPassword().equals(
+                HashUtil.hashPassword(password, userOptional.get().getSalt()))) {
+
+            throw new AuthenticationException("Can't login, wrong email or password");
         }
 
-        throw new AuthenticationException("Can't login, wrong email or password");
+        return userOptional.get();
     }
-
-    /**
-     * We should register a new user. The new user entity will contain the email and password
-     * @param email - user email. should be unique for each user
-     * @param password - user password
-     * @return new user instance
-     */
 
     @Override
     public User register(String email, String password) throws RegistrationException {
